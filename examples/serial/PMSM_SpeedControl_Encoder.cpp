@@ -37,22 +37,22 @@ SOLOMotorControllers *solo;
 long pwmFrequency = 20; 
 
 //Motor's Number of Poles
-long numberOfPoles = 8; 
+long numberOfPoles = 30; 
 
 // Current Limit of the Motor
-float currentLimit = 7.0; 
+float currentLimit = 2.0; 
 
 //Motor's Number of Encoder Lines (PPR pre-quad)
-long numberOfEncoderLines = 1000; 
+long numberOfEncoderLines = 4096; 
 
 //Speed controller Kp
-float speedControllerKp = 0.15; 
+float speedControllerKp = 0.1199798; 
 
 //Speed controller Ki
-float speedControllerKi = 0.005; 
+float speedControllerKi = 0.0049819; 
 
 // Battery or Bus Voltage
-float busVoltage = 0; 
+float busVoltage = 22; 
 
 // Motor Torque feedback
 float actualMotorTorque = 0; 
@@ -118,7 +118,7 @@ int main(int argc, char *argv[]) {
     //set the Direction on C.C.W. 
     solo->SetMotorDirection(SOLOMotorControllers::Direction::counterclockwise);
     //set an arbitrary Positive speed reference[RPM]
-    solo->SetSpeedReference(1500);
+    solo->SetSpeedReference(20);
     // wait till motor reaches to the reference 
     Sleep(300);
     actualMotorSpeed = solo->GetSpeedFeedback();
@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
     //set the Direction on C.W. 
     solo->SetMotorDirection(SOLOMotorControllers::Direction::clockwise);
     //set an arbitrary Positive speed reference[RPM]
-    solo->SetSpeedReference(3000);
+    solo->SetSpeedReference(20);
     // wait till motor reaches to the reference 
     Sleep(300);
     actualMotorSpeed = solo->GetSpeedFeedback();
