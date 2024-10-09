@@ -313,7 +313,7 @@ bool SOLOMotorControllersSerial::ExeCMD(unsigned char* cmd, int& error)
 #endif
 
 		//std::cout << "ExeCMD - WriteFile Status: " << Status <<" BytestoWrite: "<< dNoOFBytestoWrite <<" BytesWritten: "<< dNoOfBytesWritten << " isConnected: "<< isConnected <<" hSerial: "<<hSerial <<std::endl; 	
-		if (!Status) {
+		if (Status == FALSE) {
 			if (isConnected) {
 			  //std::cout << "ExeCMD - Disconnect" << std::endl;
 				SOLOMotorControllersSerial::Disconnect();
