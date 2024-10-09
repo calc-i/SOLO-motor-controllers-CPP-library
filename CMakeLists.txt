@@ -70,3 +70,12 @@ else()
     )
 endif()
 
+# Installation instructions
+install(TARGETS SOLOMotorControllers
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+)
+
+# Optionally, install header files
+install(FILES ${LIB_HEADER_FILES} DESTINATION include)
