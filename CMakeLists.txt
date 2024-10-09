@@ -11,27 +11,34 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 
 # Source files
-set(SOURCE_FILES
+set(LIB_SOURCE_FILES
     src/SOLOMotorControllers.cpp
     src/SOLOMotorControllersSerial.cpp
     src/SOLOMotorControllersUtils.cpp
 )
 
 # Header files
-set(HEADER_FILES
+set(LIB_HEADER_FILES
     src/SOLOMotorControllers.h
     src/SOLOMotorControllersSerial.h
     src/SOLOMotorControllersUtils.h
 )
 
 # Create a static or shared library
-add_library(SOLOMotorControllers SHARED ${SOURCE_FILES} ${HEADER_FILES})
-
-# Set the include directories
+add_library(SOLOMotorControllers SHARED ${LIB_SOURCE_FILES} ${LIB_HEADER_FILES})
 target_include_directories(SOLOMotorControllers PRIVATE
     ${CMAKE_SOURCE_DIR}/inc
     ${CMAKE_SOURCE_DIR}/src
 )
+
+# and a test executable
+add_executable(PMSM_SpeedControl_Encoder examples/serial/PMSM_SpeedControl_Encoder.cpp)
+target_include_directories(PMSM_SpeedControl_Encoder PRIVATE ${CMAKE_SOURCE_DIR}/inc ${CMAKE_SOURCE_DIR}/src)
+
+# link the library to the executable
+target_link_libraries(PMSM_SpeedControl_Encoder PRIVATE SOLOMotorControllers)
+
+
 
 # Set the character set (Unicode for Win32 and MultiByte for x64)
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")

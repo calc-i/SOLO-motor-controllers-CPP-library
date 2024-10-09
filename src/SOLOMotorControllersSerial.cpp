@@ -18,7 +18,7 @@
 #include <string>
 //DEBUG
 // #include "stdio.h"
-// #include <iostream>
+#include <iostream>
 // using std::cout;
 // using std::endl;
 // using std::hex; 
@@ -45,6 +45,7 @@ SOLOMotorControllersSerial::~SOLOMotorControllersSerial()
 {
 	Disconnect();
 }
+
 
 bool SOLOMotorControllersSerial::Connect(char* COMPortName, UINT8 deviceAddress,
  		SOLOMotorControllers::UartBaudrate baudrate,
@@ -165,9 +166,30 @@ void SOLOMotorControllersSerial::Disconnect()
 
 #include <fcntl.h>
 #include <termios.h>
+#include <sys/ioctl.h>
+#include <linux/serial.h>
 #include <unistd.h>
 #include <errno.h>
 #include <cstring>
+
+int set_custom_baud_rate(int fd, int speed) {
+	#include <asm/termios.h>
+    struct termios2 tio;
+    if (ioctl(fd, TCGETS2, &tio)) {
+        std::cerr << "Error getting termios2: " << strerror(errno) << std::endl;
+        return -1;
+    }
+    tio.c_cflag &= ~CBAUD;
+    tio.c_cflag |= BOTHER;
+    tio.c_ispeed = speed;
+    tio.c_ospeed = speed;
+    if (ioctl(fd, TCSETS2, &tio)) {
+        std::cerr << "Error setting termios2: " << strerror(errno) << std::endl;
+        return -1;
+    }
+    return 0;
+}
+
 
 bool SOLOMotorControllersSerial::Connect()
 {
@@ -177,14 +199,14 @@ bool SOLOMotorControllersSerial::Connect()
     }
 
     std::string comPortName = "/dev/" + std::string(portName); // ComPortName = "/dev/" + portName
-    // std::cout << "Connect - connection start ComPortName:" << comPortName << std::endl;
+    //std::cout << "Connect - connection start ComPortName:" << comPortName << std::endl;
 
     // Opening the serial port
     hSerial = open(comPortName.c_str(), O_RDWR | O_NOCTTY | O_SYNC);
     usleep(100000); // Sleep for 100ms
 
     if (hSerial < 0) {
-        // std::cout << "Connect - hSerial: error opening serial port - " << strerror(errno) << std::endl;
+        std::cout << "Connect - hSerial: error opening serial port - " << strerror(errno) << std::endl;
         return false;
     }
 
@@ -193,22 +215,27 @@ bool SOLOMotorControllersSerial::Connect()
     memset(&tty, 0, sizeof tty);
 
     if (tcgetattr(hSerial, &tty) != 0) {
-        // std::cout << "Connect - tcgetattr: error getting state - " << strerror(errno) << std::endl;
+        std::cout << "Connect - tcgetattr: error getting state - " << strerror(errno) << std::endl;
         return false;
     }
 
     switch (uartBaudrate) {
         case 0:
-            cfsetospeed(&tty, rate937500);
-            cfsetispeed(&tty, rate937500);
+			//std::cout << "Connect - rate937500" << std::endl;
+			if(set_custom_baud_rate(hSerial, 937500) != 0){
+				std::cout << "Connect - set_custom_baud_rate: error setting custom baud rate - " << strerror(errno) << std::endl;
+				return false;
+			}
             break;
         case 1:
-            cfsetospeed(&tty, rate115200);
-            cfsetispeed(&tty, rate115200);
+			//std::cout << "Connect - rate115200" << std::endl;
+            cfsetospeed(&tty, B115200);
+            cfsetispeed(&tty, B115200);
             break;
         default:
-            cfsetospeed(&tty, rate115200);
-            cfsetispeed(&tty, rate115200);
+			//std::cout << "Connect - rate115200 (default)" << std::endl;
+            cfsetospeed(&tty, B115200);
+            cfsetispeed(&tty, B115200);
             break;
     }
 
@@ -230,7 +257,7 @@ bool SOLOMotorControllersSerial::Connect()
     tty.c_cflag &= ~CRTSCTS;
 
     if (tcsetattr(hSerial, TCSANOW, &tty) != 0) {
-        // std::cout << "Connect - tcsetattr: error setting serial port state - " << strerror(errno) << std::endl;
+        std::cout << "Connect - tcsetattr: error setting serial port state - " << strerror(errno) << std::endl;
         return false;
     }
 
